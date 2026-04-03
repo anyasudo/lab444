@@ -11,19 +11,27 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() { delete ui; }
 
-// Кнопка СБРОС (очищает всё, включая колонки)
+// Кнопка СБРОС (очищает всё, включая колонки) ОБНОВИЛАА
 void MainWindow::on_btnReset_clicked() {
     ui->lineAuthor->clear();
     ui->lineTitle->clear();
     ui->lineCode->clear();
     ui->lineRatio->clear();
 
-    // Сброс колонок выбора
-    ui->radioPaper->setChecked(true);
+    ui->radioPaper->setAutoExclusive(false);
+    ui->radioElec->setAutoExclusive(false);
+
+    ui->radioPaper->setChecked(false);
+    ui->radioElec->setChecked(false);
+
+    ui->radioPaper->setAutoExclusive(true);
+    ui->radioElec->setAutoExclusive(true);
+
     ui->checkDet->setChecked(false);
     ui->checkFan->setChecked(false);
     ui->checkRom->setChecked(false);
 }
+
 
 // Кнопка СОХРАНИТЬ
 void MainWindow::on_btnSave_clicked() {
@@ -32,7 +40,7 @@ void MainWindow::on_btnSave_clicked() {
     QString code = ui->lineCode->text();
     QString rati = ui->lineRatio->text();
 
-    // 1. Валидация текста 
+    // 1. Валидация текста
     QRegularExpression reAuth("^[А-Я][а-я]+\\s[А-Я]{1,2}$");
     if (!reAuth.match(auth).hasMatch()) {
         QMessageBox::critical(this, "Ошибка", "Автор: Клоц АН (Русское слово + пробел + 1/2 заглавные)");
