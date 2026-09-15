@@ -1,0 +1,133 @@
+if __name__ == "__main__":
+
+    print("=" * 60)
+    print("Магические методы доступа к атрибутам")
+    print("=" * 60)
+
+    Point3d._debug = True
+
+    p = Point3d(1, 2, 3)
+    print(f"p = {p}")
+    _ = p.x
+    _ = p.y
+    _ = p.z
+
+    print("\nОбращение к несуществующему атрибуту:")
+    try:
+        _ = p.w
+    except AttributeError as e:
+        print(f"Поймано: {e}")
+
+    print("\nДобавление атрибута:")
+    p.name = "точка A"
+    print(f"p.name = {p.name}")
+
+    print("\nУдаление атрибута:")
+    del p.name
+
+    print("\nПрисваивание существующего атрибута:")
+    p.x = 10
+    print(f"p.x = {p.x}")
+
+    Point3d._debug = False
+
+    print("\nVector3d:")
+    Vector3d._debug = True
+    v0 = Vector3d(1, 1, 1)
+    _ = v0.x
+    Vector3d._debug = False
+
+    print()
+    print("=" * 60)
+    print("Point3d")
+    print("=" * 60)
+
+    p1 = Point3d(1, 2, 3)
+    p2 = Point3d.origin()
+    p3 = Point3d.clone(p1)
+    print(f"p1 = {p1}, repr = {p1!r}")
+    print(f"p2 = {p2}")
+    print(f"p3 = {p3} (клон p1)")
+    print(f"p1 == p3: {p1 == p3}")
+    print(f"Расстояние p1 -> p2: {p1.distance_to(p2):.4f}")
+    print(f"distance_between((0,0,0),(1,2,3)): "
+          f"{Point3d.distance_between((0,0,0),(1,2,3)):.4f}")
+    print(f"p1['x'] = {p1['x']}, p1[1] = {p1[1]}")
+    print(f"Всего точек: {Point3d._total_points_count}")
+    print(f"Итерация по p1: {[c for c in p1]}")
+
+    print()
+    print("=" * 60)
+    print("Vector3d")
+    print("=" * 60)
+
+    a = Vector3d(3, 4, 5)
+    b = Vector3d(1, 2, 3)
+    print(f"a = {a}, repr = {a!r}")
+    print(f"b = {b}")
+
+    v = Vector3d.from_points(Point3d(1, 1, 1), Point3d(4, 5, 6))
+    print(f"from_points((1,1,1),(4,5,6)) = {v}")
+
+    print(f"a == b: {a == b}")
+    print(f"a > b: {a > b}")
+    print(f"a < b: {a < b}")
+
+    print(f"a + b = {a + b}")
+    print(f"a - b = {a - b}")
+    print(f"a * 2 = {a * 2}")
+    print(f"2 * a = {2 * a}")
+    print(f"a / 2 = {a / 2}")
+    print(f"a + 3 = {a + 3}")
+    print(f"3 + a = {3 + a}")
+    print(f"3 - a = {3 - a}")
+
+    c = Vector3d(1, 1, 1)
+    c_id = id(c)
+    c += 5
+    print(f"c после c += 5: {c} (тот же объект: {id(c) == c_id})")
+    c -= Vector3d(1, 1, 1)
+    print(f"c после c -= (1,1,1): {c} (тот же объект: {id(c) == c_id})")
+    c *= 2
+    print(f"c после c *= 2: {c} (тот же объект: {id(c) == c_id})")
+    c /= 3
+    print(f"c после c /= 3: {c} (тот же объект: {id(c) == c_id})")
+
+    i = Vector3d(1, 0, 0)
+    j = Vector3d(0, 1, 0)
+    print(f"i @ j = {i @ j}")
+    print(f"a @ b = {a @ b}")
+
+    print(f"len(a) = {len(a)}")
+    print(f"length(a) = {a.length():.4f}")
+    print(f"abs(a) = {abs(a):.4f}")
+
+    print(f"a[0] = {a[0]}, a['y'] = {a['y']}, a[2] = {a[2]}")
+    print(f"Итерация по a: {[c for c in a]}")
+
+    print()
+    print("=" * 60)
+    print("Коллинеарность и компланарность")
+    print("=" * 60)
+
+    v1 = Vector3d(1, 2, 3)
+    v2 = Vector3d(2, 4, 6)
+    print(f"v1 и v2 коллинеарны: {Vector3d.is_collinear(v1, v2)}")
+
+    pt1 = Point3d(0, 0, 0)
+    pt2 = Point3d(1, 1, 1)
+    pt3 = Point3d(2, 2, 2)
+    print(f"Точки (0,0,0),(1,1,1),(2,2,2) коллинеарны: "
+          f"{Vector3d.is_collinear(pt1, pt2, pt3)}")
+
+    a1 = Vector3d(1, 0, 0)
+    a2 = Vector3d(0, 1, 0)
+    a3 = Vector3d(0, 0, 1)
+    print(f"Векторы (1,0,0),(0,1,0),(0,0,1) компланарны: "
+          f"{Vector3d.is_complanar(a1, a2, a3)}")
+
+    a4 = Vector3d(1, 0, 0)
+    a5 = Vector3d(0, 1, 0)
+    a6 = Vector3d(1, 1, 0)
+    print(f"Векторы (1,0,0),(0,1,0),(1,1,0) компланарны: "
+          f"{Vector3d.is_complanar(a4, a5, a6)}")
