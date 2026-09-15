@@ -1,0 +1,391 @@
+import math
+
+
+class Point3d:
+    _total_points_count = 0
+    _debug = False
+
+    def __init__(self, x, y, z):
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+        Point3d._total_points_count += 1
+
+    def __getattribute__(self, item):
+        if item in ('_debug', '__dict__', '__class__'):
+            return object.__getattribute__(self, item)
+        if object.__getattribute__(self, '_debug'):
+            print("getattribute:", item)
+        return object.__getattribute__(self, item)
+
+    def __setattr__(self, key, value):
+        if not key.startswith('_') and Point3d._debug:
+            print("setattr:", key, "=", value)
+        object.__setattr__(self, key, value)
+
+    def __getattr__(self, item):
+        print("getattr:", item, "не найден")
+        raise AttributeError(item)
+
+    def __delattr__(self, item):
+        if Point3d._debug:
+            print("delattr:", item)
+        object.__delattr__(self, item)
+
+    def __str__(self):
+        return f"({self.x:.2f}, {self.y:.2f}, {self.z:.2f})"
+
+    def __repr__(self):
+        return f"Point3d(x={self.x:.2f}, y={self.y:.2f}, z={self.z:.2f})"
+
+    def __eq__(self, other):
+        if isinstance(other, Point3d):
+            return (math.isclose(self.x, other.x) and
+                    math.isclose(self.y, other.y) and
+                    math.isclose(self.z, other.z))
+        return NotImplemented
+
+    def __ne__(self, other):
+        r = self.__eq__(other)
+        if r is NotImplemented:
+            return r
+        return not r
+
+    def __hash__(self):
+        return hash((round(self.x, 9), round(self.y, 9), round(self.z, 9)))
+
+    def distance_to(self, other):
+        return math.sqrt((self.x - other.x) ** 2 +
+                         (self.y - other.y) ** 2 +
+                         (self.z - other.z) ** 2)
+
+    @classmethod
+    def origin(cls):
+        return cls(0.0, 0.0, 0.0)
+
+    @classmethod
+    def clone(cls, point):
+        return cls(point.x, point.y, point.z)
+
+    @staticmethod
+    def distance_between(p1, p2):
+        return math.sqrt((p2[0] - p1[0]) ** 2 +
+                         (p2[1] - p1[1]) ** 2 +
+                         (p2[2] - p1[2]) ** 2)
+
+    def __getitem__(self, key):
+        if key == 0 or key == 'x':
+            return self.x
+        if key == 1 or key == 'y':
+            return self.y
+        if key == 2 or key == 'z':
+            return self.z
+        raise KeyError(key)
+
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.z
+
+
+class Vector3d:
+    _debug = False
+
+    def __init__(self, x, y, z):
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+
+    def __getattribute__(self, item):
+        if item in ('_debug', '__dict__', '__class__'):
+            return object.__getattribute__(self, item)
+        if object.__getattribute__(self, '_debug'):
+            print("getattribute:", item)
+        return object.__getattribute__(self, item)
+
+    def __setattr__(self, key, value):
+        if not key.startswith('_') and Vector3d._debug:
+            print("setattr:", key, "=", value)
+        object.__setattr__(self, key, value)
+
+    def __getattr__(self, item):
+        print("getattr:", item, "не найден")
+        raise AttributeError(item)
+
+    def __delattr__(self, item):
+        if Vector3d._debug:
+            print("delattr:", item)
+        object.__delattr__(self, item)
+
+    def __str__(self):
+        return f"({self.x:.2f}, {self.y:.2f}, {self.z:.2f})"
+
+    def __repr__(self):
+        return f"Vector3d(x={self.x:.2f}, y={self.y:.2f}, z={self.z:.2f})"
+
+    @classmethod
+    def from_points(cls, start, end):
+        return cls(end.x - start.x, end.y - start.y, end.z - start.z)
+
+    def __getitem__(self, key):
+        if key == 0 or key == 'x':
+            return self.x
+        if key == 1 or key == 'y':
+            return self.y
+        if key == 2 or key == 'z':
+            return self.z
+        raise KeyError(key)
+
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.z
+
+    def __len__(self):
+        return int(math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2))
+
+    def length(self):
+        return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+
+    def __abs__(self):
+        return self.length()
+
+    def __eq__(self, other):
+        if isinstance(other, Vector3d):
+            return (math.isclose(self.x, other.x) and
+                    math.isclose(self.y, other.y) and
+                    math.isclose(self.z, other.z))
+        return NotImplemented
+
+    def __ne__(self, other):
+        r = self.__eq__(other)
+        if r is NotImplemented:
+            return r
+        return not r
+
+    def __lt__(self, other):
+        if isinstance(other, Vector3d):
+            return self.length() < other.length()
+        return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, Vector3d):
+            return self.length() > other.length()
+        return NotImplemented
+
+    def __hash__(self):
+        return hash((round(self.x, 9), round(self.y, 9), round(self.z, 9)))
+
+    def _as_vector(self, other):
+        if isinstance(other, Vector3d):
+            return other.x, other.y, other.z
+        if isinstance(other, (int, float)):
+            return float(other), float(other), float(other)
+        return None
+
+    def __add__(self, other):
+        v = self._as_vector(other)
+        if v is None:
+            return NotImplemented
+        return Vector3d(self.x + v[0], self.y + v[1], self.z + v[2])
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __sub__(self, other):
+        v = self._as_vector(other)
+        if v is None:
+            return NotImplemented
+        return Vector3d(self.x - v[0], self.y - v[1], self.z - v[2])
+
+    def __rsub__(self, other):
+        v = self._as_vector(other)
+        if v is None:
+            return NotImplemented
+        return Vector3d(v[0] - self.x, v[1] - self.y, v[2] - self.z)
+
+    def __mul__(self, other):
+        v = self._as_vector(other)
+        if v is None:
+            return NotImplemented
+        return Vector3d(self.x * v[0], self.y * v[1], self.z * v[2])
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __truediv__(self, other):
+        v = self._as_vector(other)
+        if v is None:
+            return NotImplemented
+        return Vector3d(self.x / v[0], self.y / v[1], self.z / v[2])
+
+    def __rtruediv__(self, other):
+        v = self._as_vector(other)
+        if v is None:
+            return NotImplemented
+        return Vector3d(v[0] / self.x, v[1] / self.y, v[2] / self.z)
+
+    def __iadd__(self, other):
+        v = self._as_vector(other)
+        if v is None:
+            return NotImplemented
+        self.x += v[0]
+        self.y += v[1]
+        self.z += v[2]
+        return self
+
+    def __isub__(self, other):
+        v = self._as_vector(other)
+        if v is None:
+            return NotImplemented
+        self.x -= v[0]
+        self.y -= v[1]
+        self.z -= v[2]
+        return self
+
+    def __imul__(self, other):
+        v = self._as_vector(other)
+        if v is None:
+            return NotImplemented
+        self.x *= v[0]
+        self.y *= v[1]
+        self.z *= v[2]
+        return self
+
+    def __itruediv__(self, other):
+        v = self._as_vector(other)
+        if v is None:
+            return NotImplemented
+        self.x /= v[0]
+        self.y /= v[1]
+        self.z /= v[2]
+        return self
+
+    def __matmul__(self, other):
+        if not isinstance(other, Vector3d):
+            return NotImplemented
+        return Vector3d(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x
+        )
+
+    def dot(self, other):
+        return self.x * other.x + self.y * other.y + self.z * other.z
+
+    @staticmethod
+    def is_collinear(a, b, c=None):
+        if c is None:
+            cross = a @ b
+            return math.isclose(cross.length(), 0.0, abs_tol=1e-9)
+        v1 = Vector3d(b.x - a.x, b.y - a.y, b.z - a.z)
+        v2 = Vector3d(c.x - a.x, c.y - a.y, c.z - a.z)
+        cross = v1 @ v2
+        return math.isclose(cross.length(), 0.0, abs_tol=1e-9)
+
+    @staticmethod
+    def is_complanar(a, b, c):
+        return math.isclose(a.dot(b @ c), 0.0, abs_tol=1e-9)
+
+
+if __name__ == "__main__":
+
+    print("Доступ к атрибутам Point3d")
+    Point3d._debug = True
+    p = Point3d(1, 2, 3)
+    print(p)
+    print(p.x)
+    try:
+        print(p.w)
+    except AttributeError:
+        pass
+    p.name = "точка A"
+    print(p.name)
+    del p.name
+    p.x = 10
+    print(p.x)
+    Point3d._debug = False
+
+    print()
+    print("Point3d")
+    p1 = Point3d(1, 2, 3)
+    p2 = Point3d.origin()
+    p3 = Point3d.clone(p1)
+    print(p1)
+    print(repr(p1))
+    print(p2)
+    print(p3)
+    print(p1 == p3)
+    print(p1.distance_to(p2))
+    print(Point3d.distance_between((0, 0, 0), (1, 2, 3)))
+    print(p1['x'], p1[1])
+    print(Point3d._total_points_count)
+    print([c for c in p1])
+
+    print()
+    print("Vector3d")
+    a = Vector3d(3, 4, 5)
+    b = Vector3d(1, 2, 3)
+    print(a)
+    print(repr(a))
+    print(b)
+
+    v = Vector3d.from_points(Point3d(1, 1, 1), Point3d(4, 5, 6))
+    print(v)
+
+    print(a == b)
+    print(a > b)
+    print(a < b)
+
+    print(a + b)
+    print(a - b)
+    print(a * 2)
+    print(2 * a)
+    print(a / 2)
+    print(a + 3)
+    print(3 + a)
+    print(3 - a)
+
+    c = Vector3d(1, 1, 1)
+    c_id = id(c)
+    c += 5
+    print(c, id(c) == c_id)
+    c -= Vector3d(1, 1, 1)
+    print(c, id(c) == c_id)
+    c *= 2
+    print(c, id(c) == c_id)
+    c /= 3
+    print(c, id(c) == c_id)
+
+    i = Vector3d(1, 0, 0)
+    j = Vector3d(0, 1, 0)
+    print(i @ j)
+    print(a @ b)
+
+    print(len(a))
+    print(a.length())
+    print(abs(a))
+
+    print(a[0], a['y'], a[2])
+    print([c for c in a])
+
+    print()
+    print("Коллинеарность и компланарность")
+    v1 = Vector3d(1, 2, 3)
+    v2 = Vector3d(2, 4, 6)
+    print(Vector3d.is_collinear(v1, v2))
+
+    pt1 = Point3d(0, 0, 0)
+    pt2 = Point3d(1, 1, 1)
+    pt3 = Point3d(2, 2, 2)
+    print(Vector3d.is_collinear(pt1, pt2, pt3))
+
+    a1 = Vector3d(1, 0, 0)
+    a2 = Vector3d(0, 1, 0)
+    a3 = Vector3d(0, 0, 1)
+    print(Vector3d.is_complanar(a1, a2, a3))
+
+    a4 = Vector3d(1, 0, 0)
+    a5 = Vector3d(0, 1, 0)
+    a6 = Vector3d(1, 1, 0)
+    print(Vector3d.is_complanar(a4, a5, a6))
